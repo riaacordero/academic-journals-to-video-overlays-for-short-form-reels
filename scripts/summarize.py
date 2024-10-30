@@ -25,6 +25,13 @@ def summarize_text(text, max_length=250, min_length=50):
     
     summaries = []
     for idx, chunk in enumerate(chunks):
+        input_length = len(chunk.split())
+        max_length = min(int(0.4 * input_length), max_length) 
+        min_length = max(int(0.2 * input_length), min_length)
+
+        if min_length >= max_length:
+            min_length = int(0.5 * max_length)
+
         summary = summarizer(chunk, max_length=max_length, min_length=min_length, do_sample=False)
         summaries.append(summary[0]['summary_text'])
         print(f"Processed chunk {idx + 1}/{len(chunks)}")
