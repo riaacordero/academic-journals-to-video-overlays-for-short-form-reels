@@ -13,18 +13,20 @@ def generate_video(rewritten_summary):
     video_clip = video_clip.subclip(0, audio_duration)
 
     segments = rewritten_summary.split(". ")
-    segment_duration = audio_duration / len(segments)
+    segment_duration = audio_duration / len(segments) if segments else audio_duration
     text_clips = []
 
     # Text overlay for each segment
     for i, segment in enumerate(segments):
         start_time = i * segment_duration
-
-        text_clip = (TextClip(segment, fontsize=24, color='white', bg_color='black', size=video_clip.size)
+        text_clip = (TextClip(segment.strip(), fontsize=36, color='black', bg_color='white', 
+                    size=(video_clip.w * 0.9, None), method='caption', print_cmd=True, font='Helvetica')
                      .set_start(start_time)
                      .set_duration(segment_duration)
-                     .set_position('bottom')
-                     .set_opacity(0.7))
+                     .set_position(('center', 'center'))
+                     .set_opacity(0.8)
+                     .crossfadein(0.3)
+                     .crossfadeout(0.3))
         
         text_clips.append(text_clip)
 
