@@ -2,7 +2,7 @@ import os
 from gtts import gTTS
 from tqdm import tqdm
 
-def text_to_speech(text, output_dir="output", filename="narration.mp3"):
+def text_to_speech(text, output_dir="./output/audio", filename="narration.mp3"):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 

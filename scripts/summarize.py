@@ -59,7 +59,7 @@ if __name__ == "__main__":
         summary = summarize_text(extracted_text)
         rewritten_summary = rewrite_text(summary)
         
-        text_to_speech(rewritten_summary, output_dir="output", filename="narration.mp3")
+        text_to_speech(rewritten_summary, output_dir="./output/audio", filename="narration.mp3")
         
         end_time = time.time()
         
