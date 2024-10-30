@@ -12,12 +12,23 @@ def generate_video(rewritten_summary):
     audio_duration = audio_clip.duration
     video_clip = video_clip.subclip(0, audio_duration)
 
-    # Create a text overlay using the rewritten summary
-    text_clip = TextClip(rewritten_summary, fontsize=24, color='white', bg_color='black', size=video_clip.size)
-    text_clip = text_clip.set_duration(audio_duration).set_position('bottom').set_opacity(0.7)
+    segments = rewritten_summary.split(". ")
+    segment_duration = audio_duration / len(segments)
+    text_clips = []
 
-    # Combine the video and text overlay
-    final_video = CompositeVideoClip([video_clip, text_clip])
+    # Text overlay for each segment
+    for i, segment in enumerate(segments):
+        start_time = i * segment_duration
+
+        text_clip = (TextClip(segment, fontsize=24, color='white', bg_color='black', size=video_clip.size)
+                     .set_start(start_time)
+                     .set_duration(segment_duration)
+                     .set_position('bottom')
+                     .set_opacity(0.7))
+        
+        text_clips.append(text_clip)
+
+    final_video = CompositeVideoClip([video_clip] + text_clips)
     final_video = final_video.set_audio(audio_clip)
 
     final_video.write_videofile(output_video_path, fps=24)
