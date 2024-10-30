@@ -1,8 +1,8 @@
 import os, time
 from transformers import pipeline
 from nltk.tokenize import sent_tokenize
-
 from narrate import text_to_speech
+from video import generate_video
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=0)
@@ -60,11 +60,13 @@ if __name__ == "__main__":
         rewritten_summary = rewrite_text(summary)
         
         text_to_speech(rewritten_summary, output_dir="./output/audio", filename="narration.mp3")
+        generate_video(rewritten_summary)  # Pass the rewritten summary to the video function
         
         end_time = time.time()
         
         print("Summary:\n", summary)
         print("Rewritten Summary:\n", rewritten_summary)
+
         print(f"Overall time taken: {end_time - start_time:.2f} seconds")
     else:
         print("No text extracted from the PDF.")

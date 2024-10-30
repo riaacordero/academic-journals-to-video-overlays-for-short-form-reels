@@ -1,20 +1,25 @@
-from moviepy.editor import VideoFileClip, AudioFileClip, CompositeVideoClip
+from moviepy.editor import VideoFileClip, AudioFileClip, TextClip, CompositeVideoClip
+import os
 
-# MODIFY YOUR FILE PATH IF NEEDED:
 video_path = "./data/input_video/video2.mp4"
 audio_path = "./output/audio/narration.mp3"
 output_video_path = "./output/video/new_video.mp4"
 
-# Load the audio and image
-audio_clip = AudioFileClip(audio_path)
-video_clip = VideoFileClip(video_path)
+def generate_video(rewritten_summary):
+    audio_clip = AudioFileClip(audio_path)
+    video_clip = VideoFileClip(video_path)
 
-# Trim the video to match the audio length
-audio_duration = audio_clip.duration
-video_clip = video_clip.subclip(0, audio_duration)
+    audio_duration = audio_clip.duration
+    video_clip = video_clip.subclip(0, audio_duration)
 
-video = video_clip.set_audio(audio_clip)
+    # Create a text overlay using the rewritten summary
+    text_clip = TextClip(rewritten_summary, fontsize=24, color='white', bg_color='black', size=video_clip.size)
+    text_clip = text_clip.set_duration(audio_duration).set_position('bottom').set_opacity(0.7)
 
-video.write_videofile(output_video_path, fps=24)
+    # Combine the video and text overlay
+    final_video = CompositeVideoClip([video_clip, text_clip])
+    final_video = final_video.set_audio(audio_clip)
 
-print("Video created successfully!")
+    final_video.write_videofile(output_video_path, fps=24)
+
+    print("Video created successfully!")
