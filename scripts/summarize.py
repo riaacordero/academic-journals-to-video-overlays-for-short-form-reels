@@ -2,39 +2,40 @@ import os, time
 from transformers import pipeline
 from nltk.tokenize import sent_tokenize
 
+from narrate import text_to_speech
+
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=0)
 rewriter = pipeline("text2text-generation", model="t5-small", device=0)
 
-def summarize_text(text, max_length=250, min_length=50):
+def summarize_text(text):
     sentences = sent_tokenize(text)
-
-    # Adjust chunk size to the model's capacity
     max_chunk_size = 1024
+    overlap_size = 2
     chunks = []
-    current_chunk = ""
+    current_chunk = []
 
     for sentence in sentences:
-        if len(current_chunk) + len(sentence) <= max_chunk_size:
-            current_chunk += " " + sentence
+        if len(" ".join(current_chunk)) + len(sentence) <= max_chunk_size:
+            current_chunk.append(sentence)
         else:
-            chunks.append(current_chunk.strip())
-            current_chunk = sentence
+            chunks.append(" ".join(current_chunk))
+            current_chunk = current_chunk[-overlap_size:] + [sentence]
     if current_chunk:
-        chunks.append(current_chunk.strip())
+        chunks.append(" ".join(current_chunk))
     
     summaries = []
     for idx, chunk in enumerate(chunks):
-        input_length = len(chunk.split())
-        max_length = min(int(0.4 * input_length), max_length) 
-        min_length = max(int(0.2 * input_length), min_length)
-
+        max_length = min(int(0.4 * len(chunk.split())), 250)
+        min_length = max(int(0.2 * len(chunk.split())), 50)
         if min_length >= max_length:
             min_length = int(0.5 * max_length)
 
-        summary = summarizer(chunk, max_length=max_length, min_length=min_length, do_sample=False)
+        prompt = (f"Summarize the following academic content, retaining sections on main contributions, "
+                  f"methodology, and findings:\n\n{chunk}")
+        summary = summarizer(prompt, chunk, max_length=max_length, min_length=min_length, do_sample=False)
         summaries.append(summary[0]['summary_text'])
-        print(f"Processed chunk {idx + 1}/{len(chunks)}")
+        print(f"Processed chunk {idx + 1}/{len(chunks)} with max_length={max_length}, min_length={min_length}")
 
     combined_summary = " ".join(summaries)
     return combined_summary
@@ -42,7 +43,7 @@ def summarize_text(text, max_length=250, min_length=50):
 
 def rewrite_text(summary, max_length=150):
     # Prompt for rewriting
-    prompt = f"Rewrite the text in a conversational tone. Keep it up to a paragraph long\n\n{summary}"
+    prompt = f"Rewrite the text in a conversational tone\n\n{summary}"
     rewritten = rewriter(prompt, summary, max_length=max_length, do_sample=False)
     return rewritten[0]['generated_text']
 
@@ -55,15 +56,15 @@ if __name__ == "__main__":
     
     if extracted_text.strip():
         start_time = time.time()
-        
         summary = summarize_text(extracted_text)
-        print("Initial Summary:\n", summary)
-
         rewritten_summary = rewrite_text(summary)
-        print("Rewritten Summary:\n", rewritten_summary)
-
+        
+        text_to_speech(rewritten_summary, output_dir="output", filename="narration.mp3")
+        
         end_time = time.time()
+        
+        print("Summary:\n", summary)
+        print("Rewritten Summary:\n", rewritten_summary)
         print(f"Overall time taken: {end_time - start_time:.2f} seconds")
-
     else:
         print("No text extracted from the PDF.")
