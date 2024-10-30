@@ -51,7 +51,7 @@ def rewrite_text(summary, max_length=150):
 if __name__ == "__main__":
     from parse import extract_text_from_pdf
     
-    pdf_path = "./data/paper/sample.pdf"
+    pdf_path = "./data/sample.pdf"
     extracted_text = extract_text_from_pdf(pdf_path)
     
     if extracted_text.strip():

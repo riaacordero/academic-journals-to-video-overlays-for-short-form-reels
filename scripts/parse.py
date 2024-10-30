@@ -13,6 +13,6 @@ def extract_text_from_pdf(pdf_path):
     return text.strip()
 
 if __name__ == "__main__":
-    pdf_path = "./data/paper/sample.pdf"
+    pdf_path = "./data/sample.pdf"
     extracted_text = extract_text_from_pdf(pdf_path)
     print("Extracted Text:\n", extracted_text[:1000])
