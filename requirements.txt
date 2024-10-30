@@ -1,0 +1,6 @@
+transformers
+PyMuPDF
+pdfminer.six
+Pyttsx3
+moviepy
+opencv-python
