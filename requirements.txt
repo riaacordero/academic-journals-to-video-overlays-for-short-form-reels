@@ -4,3 +4,6 @@ pdfminer.six
 Pyttsx3
 moviepy
 opencv-python
+torch
+nltk
+tqdm
