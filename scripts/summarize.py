@@ -1,13 +1,35 @@
-import os, time
-from transformers import pipeline
+import os
+import time
 from nltk.tokenize import sent_tokenize
 from narrate import text_to_speech
 from video import generate_video
 from parse import extract_text_from_pdf
+from groq import Groq
+from dotenv import load_dotenv
 
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
-summarizer = pipeline("summarization", model="google/pegasus-large", device=0)
-rewriter = pipeline("text2text-generation", model="t5-small", device=0)
+load_dotenv()
+api_key = os.getenv("GROQ_API_KEY")
+# # Uncomment the rest of the code except this to check if the API key is being passed
+# print(api_key)
+
+client = Groq(api_key=api_key)
+
+def groq_summarize(text):
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a helpful assistant that summarizes academic texts."
+            },
+            {
+                "role": "user",
+                "content": f"Summarize the following text: {text}"
+            }
+        ],
+        model="llama3-8b-8192",
+    )
+
+    return chat_completion.choices[0].message.content.strip()  # Return the summary
 
 def summarize_text(text):
     sentences = sent_tokenize(text)
@@ -27,24 +49,13 @@ def summarize_text(text):
 
     summaries = []
     for idx, chunk in enumerate(chunks):
-        max_length = min(int(0.4 * len(chunk.split())), 250)
-        min_length = max(int(0.2 * len(chunk.split())), 50)
-        if min_length >= max_length:
-            min_length = int(0.5 * max_length)
+        summary = groq_summarize(chunk)
+        summaries.append(summary)
 
-        prompt = ("Summarize the following academic content in a conversational tone, "
-                  "retaining sections on main contributions, methodology, and findings.")
-
-        full_input = f"{prompt}\n\n{chunk}"
-
-        summary = summarizer(full_input, max_length=max_length, min_length=min_length, do_sample=False)
-        summaries.append(summary[0]['summary_text'].strip())
-
-        print(f"Processed chunk {idx + 1}/{len(chunks)} with max_length={max_length}, min_length={min_length}")
+        print(f"Processed chunk {idx + 1}/{len(chunks)}")
 
     combined_summary = " ".join(summaries)
     return combined_summary
-
 
 if __name__ == "__main__":
     pdf_path = "./data/sample.pdf"
