@@ -1,9 +1,7 @@
 transformers
-PyMuPDF
-pdfminer.six
-Pyttsx3
+gtts
 moviepy
-opencv-python
 torch
 nltk
 tqdm
+sentencepiece
