@@ -5,14 +5,14 @@ video_path = "./data/input_video/video2.mp4"
 audio_path = "./output/audio/narration.mp3"
 output_video_path = "./output/video/new_video.mp4"
 
-def generate_video(rewritten_summary):
+def generate_video(summary):
     audio_clip = AudioFileClip(audio_path)
     video_clip = VideoFileClip(video_path)
 
     audio_duration = audio_clip.duration
     video_clip = video_clip.subclip(0, audio_duration)
 
-    segments = rewritten_summary.split(". ")
+    segments = summary.split(". ")
     segment_duration = audio_duration / len(segments) if segments else audio_duration
     text_clips = []
 

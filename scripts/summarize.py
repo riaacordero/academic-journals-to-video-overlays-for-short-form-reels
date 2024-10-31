@@ -3,6 +3,7 @@ from transformers import pipeline
 from nltk.tokenize import sent_tokenize
 from narrate import text_to_speech
 from video import generate_video
+from parse import extract_text_from_pdf
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 summarizer = pipeline("summarization", model="google/pegasus-large", device=0)
@@ -23,7 +24,7 @@ def summarize_text(text):
             current_chunk = current_chunk[-overlap_size:] + [sentence]
     if current_chunk:
         chunks.append(" ".join(current_chunk))
-    
+
     summaries = []
     for idx, chunk in enumerate(chunks):
         max_length = min(int(0.4 * len(chunk.split())), 250)
@@ -31,42 +32,34 @@ def summarize_text(text):
         if min_length >= max_length:
             min_length = int(0.5 * max_length)
 
-        prompt = (f"Summarize the following academic content, retaining sections on main contributions, "
-                  f"methodology, and findings:\n\n{chunk}")
-        summary = summarizer(prompt, chunk, max_length=max_length, min_length=min_length, do_sample=False)
-        summaries.append(summary[0]['summary_text'])
+        prompt = ("Summarize the following academic content in a conversational tone, "
+                  "retaining sections on main contributions, methodology, and findings.")
+
+        full_input = f"{prompt}\n\n{chunk}"
+
+        summary = summarizer(full_input, max_length=max_length, min_length=min_length, do_sample=False)
+        summaries.append(summary[0]['summary_text'].strip())
+
         print(f"Processed chunk {idx + 1}/{len(chunks)} with max_length={max_length}, min_length={min_length}")
 
     combined_summary = " ".join(summaries)
     return combined_summary
 
 
-def rewrite_text(summary, max_length=150):
-    # Prompt for rewriting
-    prompt = f"Rewrite the text in a conversational tone\n\n{summary}"
-    rewritten = rewriter(prompt, summary, max_length=max_length, do_sample=False)
-    return rewritten[0]['generated_text']
-
-
 if __name__ == "__main__":
-    from parse import extract_text_from_pdf
-    
     pdf_path = "./data/sample.pdf"
     extracted_text = extract_text_from_pdf(pdf_path)
-    
+
     if extracted_text.strip():
         start_time = time.time()
         summary = summarize_text(extracted_text)
-        rewritten_summary = rewrite_text(summary)
-        
-        text_to_speech(rewritten_summary, output_dir="./output/audio", filename="narration.mp3")
-        generate_video(rewritten_summary)
+
+        generate_video(summary)
+        text_to_speech(summary, output_dir="./output/audio", filename="narration.mp3")
         
         end_time = time.time()
-        
-        print("Summary:\n", summary)
-        print("Rewritten Summary:\n", rewritten_summary)
 
+        print("Summary:\n", summary)
         print(f"Overall time taken: {end_time - start_time:.2f} seconds")
     else:
         print("No text extracted from the PDF.")
