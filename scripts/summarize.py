@@ -9,9 +9,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 api_key = os.getenv("GROQ_API_KEY")
-# # Uncomment the rest of the code except this to check if the API key is being passed
-# print(api_key)
-
 client = Groq(api_key=api_key)
 
 def groq_summarize(text):
@@ -19,13 +16,10 @@ def groq_summarize(text):
         messages=[
             {
                 "role": "system",
-                "content": "You are a helpful assistant that summarizes academic texts."
-            },
-            {
-                "role": "user",
-                "content": f"Summarize the following text: {text}"
+                "content": f"You are a helpful assistant that summarizes academic texts into gen-z language. Jump directly to the topic, do not mention the instruction. Summarize within 5 sentences only: {text}"
             }
         ],
+        
         model="llama3-8b-8192",
     )
 
