@@ -5,13 +5,13 @@ from narrate import text_to_speech
 from video import generate_video
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=0)
+summarizer = pipeline("summarization", model="google/pegasus-large", device=0)
 rewriter = pipeline("text2text-generation", model="t5-small", device=0)
 
 def summarize_text(text):
     sentences = sent_tokenize(text)
-    max_chunk_size = 1024
-    overlap_size = 2
+    max_chunk_size = 1500
+    overlap_size = 3
     chunks = []
     current_chunk = []
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         rewritten_summary = rewrite_text(summary)
         
         text_to_speech(rewritten_summary, output_dir="./output/audio", filename="narration.mp3")
-        generate_video(rewritten_summary)  # Pass the rewritten summary to the video function
+        generate_video(rewritten_summary)
         
         end_time = time.time()
         
