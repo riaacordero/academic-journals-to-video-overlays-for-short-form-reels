@@ -6,9 +6,9 @@ all large files will be available for download as a .zip file once the project i
 
 am i the asshole for not wanting to read through academic journals?
 
-this passion project converts long-read academic journals to digestible video content using Google's PEGASUS summarization model.
+this passion project converts long-read academic journals to digestible video content using Groq's llama3-8b-8192 model. 
 
-learn more about PEGASUS [here](https://research.google/blog/pegasus-a-state-of-the-art-model-for-abstractive-text-summarization/)
+tfw i originally wanted to train a model based on Google PEGASUS but my device is malfunctioning.
 
 **Notes:**
 - venv files are ignored due to size. to install dependencies use `pip install -r requirements.txt`
