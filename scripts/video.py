@@ -16,11 +16,10 @@ def generate_video(summary):
     segment_duration = audio_duration / len(segments) if segments else audio_duration
     text_clips = []
 
-    # Text overlay for each segment
     for i, segment in enumerate(segments):
         start_time = i * segment_duration
         text_clip = (TextClip(segment.strip(), fontsize=36, color='black', bg_color='white', 
-                    size=(video_clip.w * 0.9, None), method='caption', print_cmd=True, font='Helvetica')
+                    size=(video_clip.w * 0.9, None), method='caption', font='Helvetica')
                      .set_start(start_time)
                      .set_duration(segment_duration)
                      .set_position(('center', 'center'))

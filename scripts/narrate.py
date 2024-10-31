@@ -8,10 +8,7 @@ def text_to_speech(text, output_dir="./output/audio", filename="narration.mp3"):
 
     file_path = os.path.join(output_dir, filename)
     
-    sentences = text.split('. ')
-    
-    for sentence in tqdm(sentences, desc="Processing Sentences", unit="sentence"):
-        tts = gTTS(text=sentence, lang='en')
-        tts.save(file_path)
+    tts = gTTS(text=text, lang='en')
+    tts.save(file_path)
 
     print(f"Audio saved to: {file_path}")

@@ -53,10 +53,8 @@ if __name__ == "__main__":
     if extracted_text.strip():
         start_time = time.time()
         summary = summarize_text(extracted_text)
-
-        generate_video(summary)
         text_to_speech(summary, output_dir="./output/audio", filename="narration.mp3")
-        
+        generate_video(summary)        
         end_time = time.time()
 
         print("Summary:\n", summary)
